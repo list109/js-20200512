@@ -4,5 +4,11 @@
  * @returns {number | function}
  */
 export function sum (n) {
-
+    increase.toString = () => n || 0;
+    
+    function increase(newValue) {
+        return sum(n + newValue);
+    }
+    
+    return increase;
 }
