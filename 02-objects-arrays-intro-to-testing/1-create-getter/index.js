@@ -5,8 +5,7 @@
  */
 export function createGetter(path) {
     return function (obj) {
-        return path.split('.').reduce((prev, item) => {
-            return prev?.[item];
-        }, obj)
+        return path.split('.').reduce((prev, item) =>
+            prev?.[item], obj)
     }
 }
