@@ -1,10 +1,12 @@
 export default class NotificationMessage {
     constructor(message = 'Hello World', { duration = 5000, type = 'success' } = {}) {
+        NotificationMessage.prevElem;
+
         this.message = message;
         this.duration = duration;
         this.type = type;
         this.element;
-
+        
         this.render();
     }
 
@@ -29,12 +31,9 @@ export default class NotificationMessage {
     }
 
     show(elem) {
-        //незнаю как лучше, вынести во внешние переменные вместо this.constructor... 
-        //или использовать конструктор для хранения данныx? 
-        // да и тоже не уверен, сброс таймера нужен здесь здесь, чтобы по второму разу не удалять из док-та элемент?
-        this.constructor.prevElem?.remove();
+        NotificationMessage.prevElem?.remove();
 
-        this.element = this.constructor.prevElem = elem || this.element;
+        this.element = NotificationMessage.prevElem = elem || this.element;
         document.body.append(this.element)
         setTimeout(() => { this.destroy() }, this.duration);
     }
@@ -47,3 +46,4 @@ export default class NotificationMessage {
         this.remove();
     }
 }
+
