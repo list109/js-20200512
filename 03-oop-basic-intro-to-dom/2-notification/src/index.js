@@ -30,11 +30,11 @@ export default class NotificationMessage {
         `;
     }
 
-    show(elem) {
+    show(parent = document.body) {
         NotificationMessage.prevElem?.remove();
 
-        this.element = NotificationMessage.prevElem = elem || this.element;
-        document.body.append(this.element)
+        NotificationMessage.prevElem = this.element;
+        parent.append(this.element);
         setTimeout(() => { this.destroy() }, this.duration);
     }
 
