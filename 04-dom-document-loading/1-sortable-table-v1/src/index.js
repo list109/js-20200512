@@ -27,7 +27,7 @@ export default class SortableTable {
     }
 
     get template() {
-        return `<div class="sortable-table">${this.headerTemplate + this.bodyTemplate}</div>`;
+        return `<div class="sortable-table">${this.headerTemplate} ${this.bodyTemplate}</div>`;
     }
 
     get headerTemplate() {
