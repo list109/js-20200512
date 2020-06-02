@@ -31,20 +31,27 @@ export default class SortableTable {
     }
 
     get headerTemplate() {
-        return this.header.reduce((prev, item) => `${prev}
-            <div class="sortable-table__cell" data-id="${item.id}">${item.title}</div>`,
-        '<div class="sortable-table__header sortable-table__row">') + '</div>';
+        return `<div class="sortable-table__header sortable-table__row">
+            ${this.header
+                .map(item => `<div class="sortable-table__cell" data-id="${item.id}">${item.title}</div>`)
+                .join('')}
+            </div>`
     }
 
     get bodyTemplate() {
-        return this.data.reduce((prev, obj) => prev + this.getRow(obj),
-            '<div class="sortable-table__body">') + '</div>';
+        return `<div class="sortable-table__body">
+            ${this.data
+                .map(obj => this.getRow(obj))
+                .join('')}
+            </div>`;
     }
 
     getRow(obj) {
-        return this.header.reduce((prev, head) => 
-            prev + (head.template?.(obj[head.id]) || `<div class="sortable-table__cell">${obj[head.id]}</div>`),
-        '<div class="sortable-table__row">') + '</div>';
+        return `<div class="sortable-table__row">
+            ${this.header
+                .map(head =>head.template?.(obj[head.id]) || `<div class="sortable-table__cell">${obj[head.id]}</div>`)
+                .join('')}
+            </div>`
     }
 
     sort(field, order) {
@@ -53,7 +60,7 @@ export default class SortableTable {
 
         const options = {
             asc: 1,
-            desc: -1, 
+            desc: -1,
         }
 
         order = options[order] || 1;
@@ -62,7 +69,7 @@ export default class SortableTable {
             return arr.sort((a, b) => {
                 a = a.children[fieldIndex].textContent;
                 b = b.children[fieldIndex].textContent;
-                return order * a.localeCompare(b, 'ru', {caseFirst: 'upper', numeric: true});
+                return order * a.localeCompare(b, 'ru', { caseFirst: 'upper', numeric: true });
             })
         }
 
