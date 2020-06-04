@@ -35,11 +35,11 @@ export default class SortableTable {
 
     get headerTemplate() {
         return `<div data-element="header" class="sortable-table__header sortable-table__row">
-                ${this.header.map(item => headerRowTemplate(item)).join('')}
+                ${this.header.map(item => this.headerRowTemplate(item)).join('')}
             </div>`
     }
 
-    get headerRowTemplate({id, title, sortable}) {
+    headerRowTemplate({id, title, sortable}) {
         return `<div class="sortable-table__cell" data-id="${id} data-sortable="${sortable}>
             <span>${title}</span>
             ${this.arrowTemplate}
