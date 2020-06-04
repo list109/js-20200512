@@ -1,10 +1,10 @@
 export default class SortableTable {
+    element;
+    subElements = {};
+
     constructor(header, { data } = {}) {
         this.header = header;
         this.data = data;
-
-        this.element;
-        this.subElements = {};
 
         this.render();
     }
