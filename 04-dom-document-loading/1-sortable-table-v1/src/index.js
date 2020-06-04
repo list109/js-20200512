@@ -20,10 +20,13 @@ export default class SortableTable {
     }
 
     getSubElements(element) {
-        return {
-            header: element.querySelector('.sortable-table__header'),
-            body: element.querySelector('.sortable-table__body'),
-        }
+        const elements = this.element.querySelectorAll('[data-element]');
+
+        return [...elements].reduce((accum, subElement) => {
+            accum[subElement.dataset.element] = subElement;
+           
+            return accum;
+        }, {})
     }
 
     get template() {
@@ -31,11 +34,23 @@ export default class SortableTable {
     }
 
     get headerTemplate() {
-        return `<div class="sortable-table__header sortable-table__row">
-            ${this.header
-                .map(item => `<div class="sortable-table__cell" data-id="${item.id}">${item.title}</div>`)
-                .join('')}
+        return `<div data-element="header" class="sortable-table__header sortable-table__row">
+                ${this.header.map(item => headerRowTemplate(item)).join('')}
             </div>`
+    }
+
+    get headerRowTemplate({id, title, sortable}) {
+        return `<div class="sortable-table__cell" data-id="${id} data-sortable="${sortable}>
+            <span>${title}</span>
+            ${this.arrowTemplate}
+        </div>`
+    }
+
+    get arrowTemplate() {
+        return `
+          <span data-element="arrow" class="sortable-table__sort-arrow">
+            <span class="sort-arrow"></span>
+          </span>`;
     }
 
     get bodyTemplate() {
@@ -49,7 +64,7 @@ export default class SortableTable {
     getRow(obj) {
         return `<div class="sortable-table__row">
             ${this.header
-                .map(head =>head.template?.(obj[head.id]) || `<div class="sortable-table__cell">${obj[head.id]}</div>`)
+                .map(head => head.template?.(obj[head.id]) || `<div class="sortable-table__cell">${obj[head.id]}</div>`)
                 .join('')}
             </div>`
     }
