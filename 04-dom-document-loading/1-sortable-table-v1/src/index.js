@@ -54,7 +54,7 @@ export default class SortableTable {
     }
 
     get bodyTemplate() {
-        return `<div class="sortable-table__body">
+        return `<div data-element="body" class="sortable-table__body">
             ${this.data
                 .map(obj => this.getRow(obj))
                 .join('')}
