@@ -3,42 +3,46 @@ class Tooltip {
     element;
     hoveredElement = null;
 
-    hideTooltip = event => {
-        const isParent = this.hoveredElement.contains(event.relatedTarget);
-        const isNextTooltip = event.relatedTarget?.matches('[data-tooltip]');
-
-        if(isParent && !isNextTooltip) return;
-        this.destroy();
-    }
-
-    computeCoord = (event) => {
-        this.element.style.left = `${event.pageX + 10}px`;
-        this.element.style.top = `${event.pageY + 10}px`;
-    }
-
     constructor() {
         if(Tooltip.instance) return Tooltip.instance;
         Tooltip.instance = this;
     }
 
     initialize() {
-        document.addEventListener('pointerover', () => {
-            const hoveredElement = event.target.closest('[data-tooltip]');
-            if(!hoveredElement) return;
-
-            this.hoveredElement = hoveredElement;
-
-            const tip = this.hoveredElement.dataset.tooltip;
-
-            this.render(tip);
-            this.computeCoord(event);
-            this.initEventListeners(this.hoveredElement);
-        })
+        this.initEventListeners();
     }
 
-    initEventListeners(elem) {
-        elem.addEventListener('mousemove', this.computeCoord);
-        elem.addEventListener('pointerout', this.hideTooltip);
+    initEventListeners() {
+        document.addEventListener('pointerover', this.showTooltip);
+    }
+
+    showTooltip = event => {
+        const hoveredElement = event.target.closest('[data-tooltip]');
+        if(!hoveredElement) return;
+
+        this.hoveredElement = hoveredElement;
+
+        const tip = this.hoveredElement.dataset.tooltip;
+
+        this.render(tip);
+        this.computeCoord(event);
+        
+        document.addEventListener('mousemove', this.computeCoord);
+        document.addEventListener('pointerout', this.hideTooltip);
+    }
+
+    computeCoord = event => {
+        const offsetFromCursor = 10;
+        this.element.style.left = `${event.pageX + offsetFromCursor}px`;
+        this.element.style.top = `${event.pageY + offsetFromCursor}px`;
+    }
+
+    hideTooltip = event => {
+        const isChild = this.hoveredElement.contains(event.relatedTarget);
+        const isTooltip = event.relatedTarget?.matches('[data-tooltip]');
+
+        if(isChild && !isTooltip) return;
+        this.destroy();
     }
 
     render(tip = '') {
@@ -62,12 +66,11 @@ class Tooltip {
 
     destroy() {
         this.remove();
-        this.hoveredElement?.removeEventListener('mousemove', this.computeCoord);
-        this.hoveredElement?.removeEventListener('pointerout', this.hideTooltip);
+        document.removeEventListener('mousemove', this.computeCoord);
+        document.removeEventListener('pointerout', this.hideTooltip);
         this.hoveredElement = null;
     }
 }
-
 
 const tooltip = new Tooltip();
 
