@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<body>
+  <div id="root"></div>
+</body>
+
+
+<script>
+  class A {
+    element;
+
+    showTitle = () => {
+      console.error(this.title);
+    }
+
+    constructor() {
+      this.title = 'hello';
+
+      const div = document.createElement('div');
+
+      div.innerHTML = `click me!`
+
+      this.element = div;
+      this.initEventListeners();
+    }
+
+
+
+    initEventListeners() {
+      this.element.addEventListener('click', this.showTitle)
+    }
+
+    remove () {
+      this.element.removeEventListener('click', this.showTitle)
+    }
+  }
+
+  const obj = new A();
+
+  root.append(obj.element)
+  obj.remove();
+
+</script>
