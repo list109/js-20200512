@@ -16,11 +16,13 @@ export default class ColumnChart {
     link = '',
     value = 0,
     url = 'api/dashboard/orders',
+    formatHeading = data => data,
   } = {}) {
     this.label = label;
     this.link = link;
     this.value = value;
-      this.url = new URL(url, BACKEND_URL);
+    this.url = new URL(url, BACKEND_URL);
+    this.formatHeading = formatHeading;
 
     this.render();
     this.update(prevDate, currentDate);
@@ -96,7 +98,8 @@ export default class ColumnChart {
   }
 
   getTotalAmount() {
-    return this.data.reduce((prev, item) => prev + item[1], 0);
+    const total = this.data.reduce((prev, item) => prev + item[1], 0);
+    return this.formatHeading(total);
   }
 
   getColumnBody() {
@@ -108,7 +111,7 @@ export default class ColumnChart {
 
         return `
       <div style="--value: ${Math.floor(amount * scale)}" data-tooltip="
-        <div><small>${this.getDate(stringDate)}</small></div><strong>${amount}</strong>
+        <div><small>${this.getDate(stringDate)}</small></div><strong>${this.formatHeading(amount)}</strong>
       ">
       </div>
     `;
