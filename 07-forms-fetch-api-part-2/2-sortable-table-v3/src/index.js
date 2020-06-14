@@ -15,25 +15,18 @@ export default class SortableTable {
     }
 
     async sortOnServer(id = 'title', order = 'asc') {
-        const currentDate = new Date();
-        const month = 2592000000;
-        const prevDate = new Date(Date.now() - month);
-
         this.url.searchParams.set('_sort', id);
         this.url.searchParams.set('_order', order);
         this.url.searchParams.set('_start', 0);
         this.url.searchParams.set('_end', 30);
-        this.url.searchParams.set('from', prevDate);
-        this.url.searchParams.set('to', currentDate);
         const data = await fetchJson(this.url);
 
         this.update(data);
-
-        return data;
     }
 
     update(data) {
         const { body } = this.subElements;
+        this.element.classList.remove('sortable-table_loading');
         
         body.innerHTML = this.getRows(data);
     }
@@ -44,9 +37,10 @@ export default class SortableTable {
         element.innerHTML = this.template;
 
         this.element = element.firstElementChild;
+        const titleHead = this.element.querySelector('[data-id="title"]');
+        titleHead.insertAdjacentHTML('beforeend', this.arrowTemplate);
 
         const cell = this.element.querySelector('.sortable-table__cell');
-        cell.insertAdjacentHTML('beforeend', this.arrowTemplate);
 
         this.subElements = this.getSubElements(this.element);
         
@@ -65,6 +59,11 @@ export default class SortableTable {
 
         const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
         const field = head.dataset.id;
+      
+        head.dataset.order = order;
+        head.append(this.subElements.arrow);
+        this.element.classList.add('sortable-table_loading');
+      
         this.sortOnServer(field, order);
     }
 
@@ -78,7 +77,11 @@ export default class SortableTable {
     }
 
     get template() {
-        return `<div class="sortable-table sortable-table__loading">${this.headerTemplate} ${this.bodyTemplate}</div>`;
+        return `<div class="sortable-table sortable-table_loading">
+                  ${this.headerTemplate} 
+                  ${this.bodyTemplate}
+                  ${this.loadingTemplate}
+              </div>`;
     }
 
     get headerTemplate() {
@@ -111,10 +114,13 @@ export default class SortableTable {
     getRow(obj) {
         return `<div class="sortable-table__row">
             ${this.header
-                .map(head => head.template?.(obj[head.id]) || `<div class="sortable-table__cell">${obj[head.id]}
-                }</div>`)
+                .map(head => head.template?.(obj[head.id]) || `<div class="sortable-table__cell">${obj[head.id]}</div>`)
                 .join('')}
             </div>`;
+    }
+
+    get loadingTemplate() {
+      return `<div data-element="loading" class="loading-line sortable-table__loading-line"></div>`;
     }
 
     destroy() {
@@ -126,5 +132,7 @@ export default class SortableTable {
         this.element.remove();
     }
 }
+
+
 
 //npm run test:specific --findRelatedTests 07-forms-fetch-api-part-2/2-sortable-table-v3/src/index.spec.js
