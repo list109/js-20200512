@@ -14,11 +14,11 @@ export default class SortableTable {
 
         const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
         const field = head.dataset.id;
-      
+
         head.dataset.order = order;
         head.append(this.subElements.arrow);
         this.element.classList.add('sortable-table_loading');
-      
+
         this.sortOnServer(field, order);
     }
 
@@ -41,7 +41,7 @@ export default class SortableTable {
         const cell = this.element.querySelector('.sortable-table__cell');
 
         this.subElements = this.getSubElements(this.element);
-        
+
         this.initEventListeners();
 
         await this.sortOnServer();
@@ -73,7 +73,7 @@ export default class SortableTable {
     update(data) {
         const { body } = this.subElements;
         this.element.classList.remove('sortable-table_loading');
-        
+
         body.innerHTML = this.getRows(data);
     }
 
@@ -82,6 +82,7 @@ export default class SortableTable {
                   ${this.headerTemplate} 
                   ${this.bodyTemplate}
                   ${this.loadingTemplate}
+                  ${this.placeholderTemplate}
               </div>`;
     }
 
@@ -104,6 +105,14 @@ export default class SortableTable {
           </span>`;
     }
 
+    get placeholderTemplate() {
+        return `
+        <div data-elem="emptyPlaceholder" class="sortable-table__empty-placeholder"><div>
+            <p>Не найдено товаров удовлетворяющих выбранному критерию</p>
+            <button type="button" class="button-primary-outline">Очистить фильтры</button>
+        </div></div>`;
+    }
+
     get bodyTemplate() {
         return `<div data-element="body" class="sortable-table__body"></div>`;
     }
@@ -121,7 +130,7 @@ export default class SortableTable {
     }
 
     get loadingTemplate() {
-      return `<div data-element="loading" class="loading-line sortable-table__loading-line"></div>`;
+        return `<div data-element="loading" class="loading-line sortable-table__loading-line"></div>`;
     }
 
     destroy() {
