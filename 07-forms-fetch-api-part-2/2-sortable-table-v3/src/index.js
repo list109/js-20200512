@@ -7,28 +7,26 @@ export default class SortableTable {
     element;
     subElements = {};
 
+
+    load = event => {
+        const head = event.target.closest('[data-sortable]');
+        if (!head || head.dataset.sortable !== "true") return;
+
+        const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
+        const field = head.dataset.id;
+      
+        head.dataset.order = order;
+        head.append(this.subElements.arrow);
+        this.element.classList.add('sortable-table_loading');
+      
+        this.sortOnServer(field, order);
+    }
+
     constructor(header, { url = 'api/rest/products' } = {}) {
         this.url = new URL(url, BACKEND_URL);
         this.header = header;
 
         this.render();
-    }
-
-    async sortOnServer(id = 'title', order = 'asc') {
-        this.url.searchParams.set('_sort', id);
-        this.url.searchParams.set('_order', order);
-        this.url.searchParams.set('_start', 0);
-        this.url.searchParams.set('_end', 30);
-        const data = await fetchJson(this.url);
-
-        this.update(data);
-    }
-
-    update(data) {
-        const { body } = this.subElements;
-        this.element.classList.remove('sortable-table_loading');
-        
-        body.innerHTML = this.getRows(data);
     }
 
     async render() {
@@ -49,24 +47,6 @@ export default class SortableTable {
         await this.sortOnServer();
     }
 
-    initEventListeners() {
-        this.element.addEventListener('pointerdown', this.load);
-    }
-
-    load = event => {
-        const head = event.target.closest('[data-sortable]');
-        if (!head || head.dataset.sortable !== "true") return;
-
-        const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
-        const field = head.dataset.id;
-      
-        head.dataset.order = order;
-        head.append(this.subElements.arrow);
-        this.element.classList.add('sortable-table_loading');
-      
-        this.sortOnServer(field, order);
-    }
-
     getSubElements() {
         const elements = this.element.querySelectorAll('[data-element]');
 
@@ -74,6 +54,27 @@ export default class SortableTable {
             accum[subElement.dataset.element] = subElement;
             return accum;
         }, {})
+    }
+
+    initEventListeners() {
+        this.element.addEventListener('pointerdown', this.load);
+    }
+
+    async sortOnServer(id = 'title', order = 'asc') {
+        this.url.searchParams.set('_sort', id);
+        this.url.searchParams.set('_order', order);
+        this.url.searchParams.set('_start', 0);
+        this.url.searchParams.set('_end', 30);
+        const data = await fetchJson(this.url);
+
+        this.update(data);
+    }
+
+    update(data) {
+        const { body } = this.subElements;
+        this.element.classList.remove('sortable-table_loading');
+        
+        body.innerHTML = this.getRows(data);
     }
 
     get template() {
@@ -133,6 +134,3 @@ export default class SortableTable {
     }
 }
 
-
-
-//npm run test:specific --findRelatedTests 07-forms-fetch-api-part-2/2-sortable-table-v3/src/index.spec.js
