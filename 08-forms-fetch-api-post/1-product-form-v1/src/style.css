@@ -469,12 +469,12 @@ button.is-loading::before {
 }
 
 .button-primary.is-loading::before {
-  background: url("./icon-loading-circle-white.svg") center no-repeat;
+  background: url("./icons/icon-loading-circle-white.svg") center no-repeat;
   background-size: cover;
 }
 
 .button-primary-outline.is-loading::before {
-  background: url("./icon-loading-circle-blue.svg") center no-repeat;
+  background: url("./icons/icon-loading-circle-blue.svg") center no-repeat;
   background-size: cover;
 }
 
@@ -518,5 +518,60 @@ button.is-loading > span {
   }
   100% {
     background-position: -100%;
+  }
+}
+
+
+/* request notification */
+
+.notification.show {
+    display: block;
+    -webkit-animation: fadeIn 0.3s linear;
+    animation: fadeIn 0.3s linear;
+}
+.notification {
+    background-color: var(--black);
+    opacity: 0.8;
+    border-radius: 4px;
+    display: none;
+    position: fixed;
+    right: 35px;
+    bottom: 35px;
+}
+
+.notification__content {
+    padding: 16px 24px 16px 64px;
+    font-size: 16px;
+    line-height: 20px;
+    color: var(--white);
+    position: relative;
+}
+
+.notification.notification_error .notification__content:after {
+    background: url(./icons/icon-error.svg) center no-repeat;
+}
+
+.notification.notification_success .notification__content:after {
+    background: url(./icons/icon-success.svg) center no-repeat;
+}
+
+.notification.notification_success .notification__content:after, 
+.notification.notification_error .notification__content:after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    transform: translate(0, -50%);
+    background-size: 24px 24px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.8;
   }
 }
