@@ -93,6 +93,10 @@ export default class ProductForm {
         notification.classList.add('show');
         notification.classList.add('notification_success');
         notification.firstElementChild.textContent = 'Товар сохранен';
+
+        this.element.dispatchEvent(new CustomEvent('product-saved', {
+            bubbles: true, 
+        })) 
     }
 
     getRequestBody() {
@@ -297,7 +301,7 @@ export default class ProductForm {
     removeImage(event) {
       const bin = event.target.closest('[data-delete-handle]');
       const image = bin.closest('.sortable-list__item');
-      if(bin && elem) image.remove();
+      if(bin && image) image.remove();
     }
 
     remove() {
