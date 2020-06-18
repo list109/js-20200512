@@ -104,6 +104,7 @@ export default class SortableList {
 
     initEventListener() {
         document.addEventListener('pointerdown', this.initDragElement);
+        document.addEventListener('click', this.removeItem);
     }
 
     getPlaceholder({ width, height }) {
@@ -135,6 +136,13 @@ export default class SortableList {
         return elementBelow;
     }
 
+    removeItem(event) {
+        const binBtn = event.closest('[data-delete-handle]');
+        const item = binBtn?.closest('.sortable-list__item');
+
+        if(binBtn && item) item.remove();
+    }
+
     clearDragInformation() {
       document.removeEventListener('pointermove', this.moveDragElement);
       document.removeEventListener('pointerup', this.dropDragElement);
@@ -150,6 +158,8 @@ export default class SortableList {
 
     destroy() {
       document.removeEventListener('pointerdown', this.initDragElement);
+      document.removeEventListener('click', this.removeItem);
+      
       this.remove();
       this.clearDragInformation();
     }
