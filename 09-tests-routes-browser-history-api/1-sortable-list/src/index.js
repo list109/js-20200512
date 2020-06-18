@@ -6,7 +6,8 @@ export default class SortableList {
     leftCursorShift;
     topCursorShift;
 
-    initDragElement = event => {
+    checkDragElement = event => {
+      
         const dragBtn = event.target.closest('[data-grab-handle]');
         const dragItem = event.target.closest('.sortable-list__item')
         const dragItemParent = event.target.closest('.sortable-list')
@@ -38,6 +39,9 @@ export default class SortableList {
 
             event.preventDefault();
         }
+      
+      const binBtn = event.target.closest('[data-delete-handle]');
+      if (binBtn && dragItem) dragItem.remove();
     }
 
     moveDragElement = event => {
@@ -95,10 +99,7 @@ export default class SortableList {
 
         this.element = element.firstElementChild;
 
-        items.forEach(item => {
-            item.classList.add('sortable-list__item');
-            item.setAttribute('data-grab-handle', '');
-        });
+        items.forEach(item => item.classList.add('sortable-list__item'));
 
         this.element.append(...items);
     }
@@ -108,7 +109,8 @@ export default class SortableList {
     }
 
     initEventListener() {
-        document.addEventListener('pointerdown', this.initDragElement);
+        document.addEventListener('pointerdown', this.checkDragElement);
+        document.addEventListener('click', this.deleteItem);
     }
 
     getPlaceholder({ width, height }) {
@@ -155,7 +157,8 @@ export default class SortableList {
     }
 
     destroy() {
-      document.removeEventListener('pointerdown', this.initDragElement);
+      document.removeEventListener('pointerdown', this.checkDragElement);
+      document.removeEventListener('click', this.deleteItem);
       this.remove();
       this.clearDragInformation();
     }
