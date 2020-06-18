@@ -1,6 +1,7 @@
 //import SortableList from '../../../08-tests-routes-browser-history-api/2-sortable-list/solution/index.js';
 import escapeHtml from './utils/escape-html.js';
 import fetchJson from './utils/fetch-json.js';
+import SortableList from './sortable-list.js'
 
 const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const BACKEND_URL = 'https://course-js.javascript.ru';
@@ -8,8 +9,9 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 export default class ProductForm {
     categoriesData = [];
     productData = {};
-    imageFile = null;
-    notification = null;
+    imageFile;
+    notification;
+    sortableList;
 
     constructor(productId) {
         this.productId = productId;
@@ -24,9 +26,14 @@ export default class ProductForm {
 
         this.subElements = this.getSubElements();
       
-        const {productForm} = this.subElements;
+        const {productForm, imageListContainer} = this.subElements;
         const {subcategory, status} = this.productData;
 
+        const items = [...imageListContainer.children];
+        const {element: sortableList} = new SortableList({items});
+        imageListContainer.append(sortableList);
+        this.sortableList = sortableList;
+      
         // с коротким синтаксисом без elements не проходят тесты
         productForm.elements.subcategory.value = subcategory;
         productForm.elements.status.value = status;
@@ -62,8 +69,6 @@ export default class ProductForm {
     initEventListeners() {
         const { uploadImage } = this.subElements;
         uploadImage.addEventListener('pointerdown', this.initImageUploading);
-      
-        this.element.addEventListener('pointerdown', this.removeImage);
 
         this.element.addEventListener('submit', this.uploadData);
     }
@@ -85,13 +90,11 @@ export default class ProductForm {
             });
         } catch (err) {
             notification.firstElementChild.textContent = err.message;
-            notification.classList.add('show');
-            notification.classList.add('notification_error');
+            notification.classList.add('show', 'notification_error');
             return;
         }
 
-        notification.classList.add('show');
-        notification.classList.add('notification_success');
+        notification.classList.add('show', 'notification_success');
         notification.firstElementChild.textContent = 'Товар сохранен';
 
         this.element.dispatchEvent(new CustomEvent('product-saved', {
@@ -100,7 +103,8 @@ export default class ProductForm {
     }
 
     getRequestBody() {
-        const { productForm, imageListContainer } = this.subElements;
+        const { productForm } = this.subElements;
+        const sortableList = this.sortableList;
         const fields = ['id', 'title', 'description', 'discount', 'price',
             'quantity', 'status', 'subcategory',];
 
@@ -110,7 +114,7 @@ export default class ProductForm {
             return obj;
         }, {})
 
-        const imagesBody = [...imageListContainer.children].map(item => {
+        const imagesBody = [...sortableList.children].map(item => {
             const url = item.children[0].value;
             const source = item.children[1].value;
             return { url, source };
@@ -154,9 +158,9 @@ export default class ProductForm {
     }
 
     insertImage(name, { link }) {
-        const { imageListContainer } = this.subElements;
+        const sortableList = this.sortableList;
 
-        imageListContainer.insertAdjacentHTML('beforeEnd', this.getImageTemplate({
+        sortableList.insertAdjacentHTML('beforeEnd', this.getImageTemplate({
             url: link,
             source: name,
         }));
@@ -249,14 +253,14 @@ export default class ProductForm {
 
     getImagesListTemplate(images = []) {
         return `
-        <ul class="sortable-list" data-element="imageListContainer">
+        <div data-element="imageListContainer">
           ${images.map(image => this.getImageTemplate(image)).join('')}   
-        </ul>`
+        </div>`
     }
 
     getImageTemplate({ url, source }) {
         return `
-        <li class="products-edit__imagelist-item sortable-list__item">
+        <li class="sortable-list__item products-edit__imagelist-item">
             <input type="hidden" name="url" value="${url}">
             <input type="hidden" name="source" value="${source}">
             <span>
@@ -298,12 +302,6 @@ export default class ProductForm {
         }, {})
     }
 
-    removeImage(event) {
-      const bin = event.target.closest('[data-delete-handle]');
-      const image = bin.closest('.sortable-list__item');
-      if(bin && image) image.remove();
-    }
-
     remove() {
         this.element.remove();
     }
@@ -316,45 +314,4 @@ export default class ProductForm {
     }
 }
 
-
-class RequestNotification {
-    static element = null;
-  
-    constructor(timeOut = 3000) {
-      this.timeOut = timeOut;
-      
-      this.render();
-      this.show();
-    }
-  
-    render() {  
-        this.destroy();  
-      
-        const element = document.createElement('div');
-        element.innerHTML = this.getTemplate;
-      
-        this.element = element.firstElementChild
-        RequestNotification.element = this.element;
-    }
-
-    show(parent = document.body) {
-        parent.append(this.element);
-        setTimeout(() => this.element.remove(), this.timeOut)
-    };
-
-    get getTemplate() {
-        return `
-        <div class="notification">
-            <div class="notification__content"></div>
-        </div>`
-    }
-
-    remove() {
-        RequestNotification.element?.remove();
-    }
-
-    destroy() {
-        this.remove();
-    }
-}
 
