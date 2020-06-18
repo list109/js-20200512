@@ -1,15 +1,17 @@
 export default class SortableList {
     element;
     currentDragItem;
+    dragItemParent;
     placeholder;
     leftCursorShift;
     topCursorShift;
 
     initDragElement = event => {
-        const dragItem = event.target.closest('[data-grab-handle]');
+        const dragBtn = event.target.closest('[data-grab-handle]');
+        const dragItem = event.target.closest('.sortable-list__item')
         const dragItemParent = event.target.closest('.sortable-list')
 
-        if (dragItem && dragItemParent) {
+        if (dragBtn && dragItem && dragItemParent) {
             const { left, top } = dragItem.getBoundingClientRect();
             const width = dragItem.offsetWidth;
             const height = dragItem.offsetHeight;
@@ -19,19 +21,20 @@ export default class SortableList {
             dragItem.classList.add('sortable-list__item_dragging');
 
             dragItem.replaceWith(placeholder);
-            document.body.append(dragItem);
+            dragItemParent.append(dragItem);
 
             this.leftCursorShift = event.clientX - left;
             this.topCursorShift = event.clientY - top;
-
-            this.currentDragItem = dragItem;
-            this.placeholder = placeholder;
 
             this.setPosition(dragItem, event);
 
             document.addEventListener('pointermove', this.moveDragElement);
             document.addEventListener('pointerup', this.dropDragElement);
             dragItem.ondragstart = () => false;
+
+            this.dragItemParent = dragItemParent;
+            this.currentDragItem = dragItem;
+            this.placeholder = placeholder;
 
             event.preventDefault();
         }
@@ -46,8 +49,10 @@ export default class SortableList {
         this.setPosition(dragItem, event);
 
         const dropArea = this.getElementBelow(dragItem, event);
+        const isParent = this.dragItemParent.contains(dropArea);
+        const isDropArea = dropArea.matches('.sortable-list__item');
 
-        if (dropArea.matches('.sortable-list__item')) {
+        if (isDropArea && isParent) {
             const { top: dropAreaTop} = dropArea.getBoundingClientRect();
             const dropAreaMiddle = dropArea.offsetHeight / 2 + dropAreaTop;
           
@@ -104,7 +109,6 @@ export default class SortableList {
 
     initEventListener() {
         document.addEventListener('pointerdown', this.initDragElement);
-        document.addEventListener('click', this.removeItem);
     }
 
     getPlaceholder({ width, height }) {
@@ -136,18 +140,12 @@ export default class SortableList {
         return elementBelow;
     }
 
-    removeItem(event) {
-        const binBtn = event.closest('[data-delete-handle]');
-        const item = binBtn?.closest('.sortable-list__item');
-
-        if(binBtn && item) item.remove();
-    }
-
     clearDragInformation() {
       document.removeEventListener('pointermove', this.moveDragElement);
       document.removeEventListener('pointerup', this.dropDragElement);
 
-      
+      this.currentDragItem = null;
+      this.placeholder = null;
       this.leftCursorShift = null;
       this.topCursorShift = null;
     }
@@ -158,8 +156,6 @@ export default class SortableList {
 
     destroy() {
       document.removeEventListener('pointerdown', this.initDragElement);
-      document.removeEventListener('click', this.removeItem);
-      
       this.remove();
       this.clearDragInformation();
     }
