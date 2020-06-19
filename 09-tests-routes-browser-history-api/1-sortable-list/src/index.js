@@ -150,6 +150,7 @@ export default class SortableList {
       this.placeholder = null;
       this.leftCursorShift = null;
       this.topCursorShift = null;
+      this.dragItemParent = null;;
     }
 
     remove() {
