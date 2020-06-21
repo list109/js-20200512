@@ -121,7 +121,8 @@ body {
 
 .sortable-table__empty-placeholder,
 .sortable-table_empty .sortable-table__header,
-.sortable-table_empty .sortable-table__body {
+.sortable-table_empty .sortable-table__body,
+.sortable-table.sortable-table_loading .sortable-table__body {
   display: none;
 }
 
