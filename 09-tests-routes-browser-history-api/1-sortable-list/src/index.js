@@ -54,7 +54,7 @@ export default class SortableList {
 
         const dropArea = this.getElementBelow(dragItem, event);
         const isParent = this.dragItemParent.contains(dropArea);
-        const isDropArea = dropArea.matches('.sortable-list__item');
+        const isDropArea = dropArea?.matches('.sortable-list__item');
 
         if (isDropArea && isParent) {
             const { top: dropAreaTop} = dropArea.getBoundingClientRect();
@@ -150,7 +150,7 @@ export default class SortableList {
       this.placeholder = null;
       this.leftCursorShift = null;
       this.topCursorShift = null;
-      this.dragItemParent = null;;
+      this.dragItemParent =null;
     }
 
     remove() {
