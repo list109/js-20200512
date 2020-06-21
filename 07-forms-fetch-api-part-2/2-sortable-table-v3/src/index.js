@@ -7,19 +7,10 @@ export default class SortableTable {
     element;
     subElements = {};
 
-
-    load = event => {
+    onClick = event => {
         const head = event.target.closest('[data-sortable]');
-        if (!head || head.dataset.sortable !== "true") return;
 
-        const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
-        const field = head.dataset.id;
-
-        head.dataset.order = order;
-        head.append(this.subElements.arrow);
-        this.element.classList.add('sortable-table_loading');
-
-        this.sortOnServer(field, order);
+        if (head && head.dataset.sortable === "true") this.load(head);
     }
 
     constructor(header, { url = 'api/rest/products' } = {}) {
@@ -57,7 +48,18 @@ export default class SortableTable {
     }
 
     initEventListeners() {
-        this.element.addEventListener('pointerdown', this.load);
+        this.element.addEventListener('pointerdown', this.onClick);
+    }
+
+    load(head) {
+        const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
+        const field = head.dataset.id;
+
+        head.dataset.order = order;
+        head.append(this.subElements.arrow);
+        this.element.classList.add('sortable-table_loading');
+
+        this.sortOnServer(field, order);
     }
 
     async sortOnServer(id = 'title', order = 'asc') {
@@ -135,7 +137,7 @@ export default class SortableTable {
 
     destroy() {
         this.remove();
-        this.element.removeEventListener('click', this.sortByHead);
+        this.element.removeEventListener('click', this.onClick);
     }
 
     remove() {
