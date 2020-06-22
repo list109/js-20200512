@@ -6,11 +6,49 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 export default class SortableTable {
     element;
     subElements = {};
+    isLoading = false;
+
+    sort = 'title';
+    order = 'asc';
+    start = 0;
+    end = 30;
+    maxRequestRows = 30;
 
     onClick = event => {
         const head = event.target.closest('[data-sortable]');
 
-        if (head && head.dataset.sortable === "true") this.load(head);
+        if (head && head.dataset.sortable === "true") this.sortByHead(head);
+    }
+
+    onScroll = async () => {
+        const html = document.documentElement;
+        const { bottom } = html.getBoundingClientRect();
+        const fullHeight = bottom + pageYOffset;
+        const restBottomScroll = fullHeight - pageYOffset - html.clientHeight;
+
+        if (restBottomScroll < 50 && this.isLoading === false) {
+
+            this.isLoading = true;
+
+            this.start += this.maxRequestRows;
+            this.end += this.maxRequestRows;
+
+            this.url.searchParams.set('_start', this.start);
+            this.url.searchParams.set('_end', this.end);
+
+            const response = await fetch(this.url);
+            const isRestData = response.headers.get('x-total-count');
+            
+            if(Number(isRestData)) {
+                this.element.classList.add('sortable-table_loading');
+
+                const data = await response.json();
+
+                this.update(data);
+            }
+
+            this.isLoading = false;
+        }
     }
 
     constructor(header, { url = 'api/rest/products' } = {}) {
@@ -29,13 +67,13 @@ export default class SortableTable {
         const titleHead = this.element.querySelector('[data-id="title"]');
         titleHead.insertAdjacentHTML('beforeend', this.arrowTemplate);
 
-        const cell = this.element.querySelector('.sortable-table__cell');
-
         this.subElements = this.getSubElements(this.element);
 
         this.initEventListeners();
 
-        await this.sortOnServer();
+        const data = await this.sortOnServer();
+
+        this.update(data);
     }
 
     getSubElements() {
@@ -49,34 +87,44 @@ export default class SortableTable {
 
     initEventListeners() {
         this.element.addEventListener('pointerdown', this.onClick);
+        document.addEventListener('scroll', this.onScroll);
     }
 
-    load(head) {
+    async sortByHead(head) {
+        const { body } = this.subElements;
+        body.innerHTML = '';
+        
         const order = (head.dataset.order === 'asc') ? 'desc' : 'asc';
-        const field = head.dataset.id;
+        const sort = head.dataset.id;
 
         head.dataset.order = order;
         head.append(this.subElements.arrow);
         this.element.classList.add('sortable-table_loading');
 
-        this.sortOnServer(field, order);
-    }
+        this.sort = sort;
+        this.order = order;
+        this.start = 0;
+        this.end = this.maxRequestRows;
 
-    async sortOnServer(id = 'title', order = 'asc') {
-        this.url.searchParams.set('_sort', id);
-        this.url.searchParams.set('_order', order);
-        this.url.searchParams.set('_start', 0);
-        this.url.searchParams.set('_end', 30);
-        const data = await fetchJson(this.url);
+        const data = await this.sortOnServer(sort, order);
 
         this.update(data);
+    }
+    
+    async sortOnServer(sort = this.sort, order = this.order, { start = this.start, end = this.end } = {}) {
+        this.url.searchParams.set('_sort', sort);
+        this.url.searchParams.set('_order', order);
+        this.url.searchParams.set('_start', start);
+        this.url.searchParams.set('_end', end);
+
+        return await fetchJson(this.url);
     }
 
     update(data) {
         const { body } = this.subElements;
         this.element.classList.remove('sortable-table_loading');
 
-        body.innerHTML = this.getRows(data);
+        body.insertAdjacentHTML('beforeend', this.getRows(data));
     }
 
     get template() {
@@ -137,7 +185,9 @@ export default class SortableTable {
 
     destroy() {
         this.remove();
+
         this.element.removeEventListener('click', this.onClick);
+        document.removeEventListener('scroll', this.onScroll);
     }
 
     remove() {
