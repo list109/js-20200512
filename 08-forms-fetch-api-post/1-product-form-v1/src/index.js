@@ -11,7 +11,6 @@ export default class ProductForm {
     categoriesData = [];
     productData = {};
     imageFile;
-    notification;
     sortableList;
 
     constructor(productId) {
@@ -26,21 +25,21 @@ export default class ProductForm {
         this.element.innerHTML = this.getTemplate;
 
         this.subElements = this.getSubElements();
-      
-        const {productForm, imageListContainer} = this.subElements;
-        const {subcategory, status} = this.productData;
+
+        const { productForm, imageListContainer } = this.subElements;
+        const { subcategory, status } = this.productData;
 
         const items = [...imageListContainer.children];
-        const {element: sortableList} = new SortableList({items});
+        const { element: sortableList } = new SortableList({ items });
         imageListContainer.append(sortableList);
         this.sortableList = sortableList;
-      
+
         // с коротким синтаксисом без elements не проходят тесты
         productForm.elements.subcategory.value = subcategory;
         productForm.elements.status.value = status;
-      
+
         this.initEventListeners();
-      
+
         return this.element;
     }
 
@@ -63,13 +62,13 @@ export default class ProductForm {
         const url = new URL('api/rest/products', BACKEND_URL);
 
         url.searchParams.set('id', this.productId);
-      
+
         return await fetchJson(url);
     }
 
     initEventListeners() {
-        const { uploadImage } = this.subElements;
-        uploadImage.addEventListener('pointerdown', this.initImageUploading);
+        const { uploadBtn } = this.subElements;
+        uploadBtn.addEventListener('pointerdown', this.initImageUploading);
 
         this.element.addEventListener('submit', this.uploadData);
     }
@@ -77,7 +76,7 @@ export default class ProductForm {
     uploadData = async (event) => {
         event.preventDefault();
 
-        const {element: notification} = new RequestNotification();
+        const { element: notification } = new RequestNotification();
 
         const url = new URL('api/rest/products', BACKEND_URL);
 
@@ -99,8 +98,8 @@ export default class ProductForm {
         notification.firstElementChild.textContent = 'Товар сохранен';
 
         this.element.dispatchEvent(new CustomEvent('product-saved', {
-            bubbles: true, 
-        })) 
+            bubbles: true,
+        }))
     }
 
     getRequestBody() {
@@ -120,7 +119,7 @@ export default class ProductForm {
             const source = item.children[1].value;
             return { url, source };
         })
-        
+
         body.id = this.productData.id;
         body.images = imagesBody;
 
@@ -136,9 +135,9 @@ export default class ProductForm {
     }
 
     uploadImage = async () => {
-        const { uploadImage } = this.subElements;
+        const { uploadBtn } = this.subElements;
 
-        uploadImage.classList.add('is-loading');
+        uploadBtn.classList.add('is-loading');
 
         const fileName = this.imageFile.value.split('\\').slice(-1);
         const form = document.createElement('form');
@@ -146,16 +145,26 @@ export default class ProductForm {
         form.append(this.imageFile);
 
         const url = 'https://api.imgur.com/3/image';
-        const response = await fetchJson(url, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                authorization: `Client-ID ${IMGUR_CLIENT_ID}`
-            }
-        })
-        uploadImage.classList.remove('is-loading');
 
-        this.insertImage(fileName, response.data);
+        try {
+
+           const response = await fetchJson(url, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    authorization: `Client-ID ${IMGUR_CLIENT_ID}`
+                }
+            })
+
+            uploadBtn.classList.remove('is-loading');
+            this.insertImage(fileName, response.data);
+
+        } catch (err) {
+
+            uploadBtn.classList.remove('is-loading');
+            throw err;
+
+        }
     }
 
     insertImage(name, { link }) {
@@ -181,7 +190,7 @@ export default class ProductForm {
     }
 
     get formDescriptionTeplate() {
-        const {title = '', description = '', images = []} = this.productData;
+        const { title = '', description = '', images = [] } = this.productData;
 
         return `
         <div class="form-group form-group__half_left">
@@ -202,15 +211,15 @@ export default class ProductForm {
 
             <div data-element="fileInputList"></div>
 
-            <button data-element="uploadImage" type="button" class="button-primary-outline">
+            <button data-element="uploadBtn" type="button" class="button-primary-outline">
                 <span>Загрузить</span>
             </button>
         </div>`
     }
 
     get formParametersTemplate() {
-        const {price = 100, discount = 10, quantity = 1, subcategory} = this.productData;
-      
+        const { price = 100, discount = 10, quantity = 1, subcategory } = this.productData;
+
         return `
         <div class="form-group form-group__half_left">
             <label class="form-label">Категория</label>
@@ -308,13 +317,20 @@ export default class ProductForm {
     }
 
     destroy() {
+        
+
+        console.log(this);
+
+        //this.uploadImage.removeEventListener('pointerdown', this.initImageUploading);
+        //this.element.removeEventListener('submit', this.uploadData);
+
+        //this.remove();
+
         this.imageFile = null;
         this.categoriesData = [];
         this.productData = {};
-        this.remove();
-        
-        uploadImage.removeEventListener('pointerdown', this.initImageUploading);
-        this.element.removeEventListener('submit', this.uploadData);
+
+
     }
 }
 
