@@ -6,6 +6,7 @@ import RequestNotification from './notification.js';
 
 const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const BACKEND_URL = 'https://course-js.javascript.ru';
+const IMG_UPLOADING_SERVICE_URL = 'https://api.imgur.com/3/image';
 
 export default class ProductForm {
     categoriesData = [];
@@ -48,7 +49,7 @@ export default class ProductForm {
         const loadedProductData = (this.productId) ? this.loadProductData() : Promise.resolve({}); 
 
         const [categoriesData, productData] = await Promise.all([loadedCategoriesData, loadedProductData]);
-        
+
         this.productData = productData[0];
         this.categoriesData = categoriesData;
     }
@@ -148,11 +149,9 @@ export default class ProductForm {
 
         form.append(this.imageFile);
 
-        const url = 'https://api.imgur.com/3/image';
-
         try {
 
-           const response = await fetchJson(url, {
+           const response = await fetchJson(IMG_UPLOADING_SERVICE_URL, {
                 method: 'POST',
                 body: new FormData(form),
                 headers: {
