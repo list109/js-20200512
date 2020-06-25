@@ -136,7 +136,7 @@ export default class DoubleSlider {
   }
 
   sendEvent() {
-    let {from, to} = this.subElements;
+    const {from, to} = this.subElements;
 
     this.element.dispatchEvent(new CustomEvent('range-select', {
       bubbles: true,
