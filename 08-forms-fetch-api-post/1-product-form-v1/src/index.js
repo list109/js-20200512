@@ -311,6 +311,9 @@ export default class ProductForm {
         this.categoriesData = [];
         this.productData = {};
         this.remove();
+        
+        uploadImage.removeEventListener('pointerdown', this.initImageUploading);
+        this.element.removeEventListener('submit', this.uploadData);
     }
 }
 
