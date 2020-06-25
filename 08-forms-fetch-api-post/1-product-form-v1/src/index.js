@@ -44,9 +44,13 @@ export default class ProductForm {
     }
 
     async loadData() {
-        this.categoriesData = await this.loadCategoriesData();
-        if (this.productId) this.productData = await this.loadProductData();
-        this.productData = this.productData?.[0] || {};
+        const loadedCategoriesData = this.loadCategoriesData();
+        const loadedProductData = (this.productId) ? this.loadProductData() : Promise.resolve({}); 
+
+        const [categoriesData, productData] = await Promise.all([loadedCategoriesData, loadedProductData]);
+        
+        this.productData = productData[0];
+        this.categoriesData = categoriesData;
     }
 
     async loadCategoriesData() {
