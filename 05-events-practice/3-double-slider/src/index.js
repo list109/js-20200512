@@ -118,7 +118,7 @@ export default class DoubleSlider {
   }
 
   initEventListeners() {
-    document.addEventListener('pointerdown', this.initThumb);
+    this.element.addEventListener('pointerdown', this.initThumb);
   }
 
   getRelatableValue(dividend, divider) {
@@ -160,6 +160,8 @@ export default class DoubleSlider {
   }
 
   destroy() {
+    this.element.removeEventListener('pointerdown', this.initThumb);
+
     this.clearThumbData();
     this.remove();
   }
