@@ -45,11 +45,11 @@ export default class DoubleSlider {
   initThumbsPosition({from = this.min, to = this.max} = {}) {
     const { thumbLeft, thumbRight } = this.subElements;
     const diff = this.max - this.min;
-    from -= this.min;
-    to -= this.min;
-
-    thumbLeft.style.left = `${from / diff * 100}%`;
-    thumbRight.style.right = `${100 - to / diff * 100}%`;
+    const absoluteFrom = from - this.min;
+    const absoluteTo = to - this.min;
+    
+    thumbLeft.style.left = `${absoluteFrom / diff * 100}%`;
+    thumbRight.style.right = `${100 - absoluteTo / diff * 100}%`;
 
     this.changeProgress();
     this.changeNumericFields();
