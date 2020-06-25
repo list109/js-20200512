@@ -120,8 +120,10 @@ export default class ProductForm {
         }, {})
 
         const imagesBody = [...sortableList.children].map(item => {
-            const url = item.children[0].value;
-            const source = item.children[1].value;
+
+            const {value: url} = item.children[0];
+            const {value: source} = item.children[1];
+            
             return { url, source };
         })
 
