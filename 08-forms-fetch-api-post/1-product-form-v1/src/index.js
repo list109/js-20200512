@@ -131,11 +131,12 @@ export default class ProductForm {
         return JSON.stringify(body);
     }
 
-    initImageUploading = event => {
+    initImageUploading = () => {
         this.imageFile = document.createElement('input');
         this.imageFile.type = 'file';
         this.imageFile.name = 'image';
         this.imageFile.oninput = this.uploadImage;
+        document.body.append(this.imageFile);
         this.imageFile.click();
     }
 
