@@ -2,6 +2,7 @@
 import escapeHtml from './utils/escape-html.js';
 import fetchJson from './utils/fetch-json.js';
 import SortableList from './sortable-list.js'
+import RequestNotification from './notification.js';
 
 const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const BACKEND_URL = 'https://course-js.javascript.ru';
@@ -76,7 +77,7 @@ export default class ProductForm {
     uploadData = async (event) => {
         event.preventDefault();
 
-        const notification = (new RequestNotification()).element;
+        const {element: notification} = new RequestNotification();
 
         const url = new URL('api/rest/products', BACKEND_URL);
 
@@ -264,12 +265,12 @@ export default class ProductForm {
             <input type="hidden" name="url" value="${url}">
             <input type="hidden" name="source" value="${source}">
             <span>
-              <img src="./icons/icon-grab.svg" data-grab-handle alt="grab">
+              <img src="./icon-grab.svg" data-grab-handle alt="grab">
               <img class="sortable-table__cell-img" alt="Image" src="${url}">
               <span>${source}</span>
             </span>
             <button type="button">
-              <img src="./icons/icon-trash.svg" data-delete-handle alt="delete">
+              <img src="./icon-trash.svg" data-delete-handle alt="delete">
             </button>
         </li>`
     }
