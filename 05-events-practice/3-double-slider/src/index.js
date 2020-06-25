@@ -98,9 +98,9 @@ export default class DoubleSlider {
     const siblingThumbPosition = parseFloat(this.subElements[siblingThumbName].style[edges[siblingThumbName]], 4);
     
     let changedPosition = event.clientX - parentLeftEdge - this.cursorOffest;
-    
-    changedPosition = (changedPosition <= 0) ? 0 :
-      (changedPosition >= parentWidth) ? parentWidth : changedPosition;  
+      
+    if(changedPosition <= 0) changedPosition = 0;
+    if(changedPosition >= parentWidth) changedPosition = parentWidth;
      
     changedPosition = currentThumbName === 'thumbRight' ? parentWidth - changedPosition : changedPosition;
     changedPosition = this.getRelatableValue(changedPosition, parentWidth);
