@@ -469,12 +469,12 @@ button.is-loading::before {
 }
 
 .button-primary.is-loading::before {
-  background: url("./icons/icon-loading-circle-white.svg") center no-repeat;
+  background: url("./icon-loading-circle-white.svg") center no-repeat;
   background-size: cover;
 }
 
 .button-primary-outline.is-loading::before {
-  background: url("./icons/icon-loading-circle-blue.svg") center no-repeat;
+  background: url("./icon-loading-circle-blue.svg") center no-repeat;
   background-size: cover;
 }
 
@@ -548,11 +548,11 @@ button.is-loading > span {
 }
 
 .notification.notification_error .notification__content:after {
-    background: url(./icons/icon-error.svg) center no-repeat;
+    background: url('./icon-error.svg') center no-repeat;
 }
 
 .notification.notification_success .notification__content:after {
-    background: url(./icons/icon-success.svg) center no-repeat;
+    background: url('./icon-success.svg') center no-repeat;
 }
 
 .notification.notification_success .notification__content:after, 
