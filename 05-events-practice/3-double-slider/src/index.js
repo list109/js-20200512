@@ -1,15 +1,26 @@
 export default class DoubleSlider {
   element;
   currentThumb = null;
-  cursorOffest = null;
-
-  initThumb = event => {
+  cursorOffset = null;
+  cursorShiftX;
+  cursorShiftY;
+  
+  onClick = (event) => {
     const thumb = event.target.closest('[data-element^="thumb"]');
-    if (!thumb) return;
+
+    if (thumb) this.initThumb(thumb, event);
+  }
+
+  initThumb(thumb, event) {
+    const{right, left} = thumb.getBoundingClientRect();
+    const {clientX} = event;
+    const {element} = thumb.dataset;
 
     this.currentThumb = thumb;
 
     this.element.classList.add('range-slider_dragging');
+
+    this.cursorOffset = (element === 'thumbRight') ? left - clientX : right - clientX;
 
     document.addEventListener('pointermove', this.moveThumb);
     document.addEventListener('pointerup', this.dropThumb);
@@ -23,7 +34,7 @@ export default class DoubleSlider {
     const edges = { 'thumbRight': 'right', 'thumbLeft': 'left' };
     const siblingThumbPosition = parseFloat(this.subElements[siblingThumbName].style[edges[siblingThumbName]], 4);
     
-    let changedPosition = event.clientX - parentLeftEdge - this.cursorOffest;
+    let changedPosition = event.clientX - parentLeftEdge + this.cursorOffset;
       
     if(changedPosition <= 0) changedPosition = 0;
     if(changedPosition >= parentWidth) changedPosition = parentWidth;
@@ -31,7 +42,6 @@ export default class DoubleSlider {
     changedPosition = currentThumbName === 'thumbRight' ? parentWidth - changedPosition : changedPosition;
     changedPosition = this.getRelatableValue(changedPosition, parentWidth);
     
-
     changedPosition = Math.min(changedPosition, 100 - siblingThumbPosition);
 
     this.currentThumb.style[edges[currentThumbName]] = `${changedPosition}%`;
@@ -118,7 +128,7 @@ export default class DoubleSlider {
   }
 
   initEventListeners() {
-    this.element.addEventListener('pointerdown', this.initThumb);
+    this.element.addEventListener('pointerdown', this.onClick);
   }
 
   getRelatableValue(dividend, divider) {
@@ -137,12 +147,14 @@ export default class DoubleSlider {
 
   sendEvent() {
     const {from, to} = this.subElements;
+    const numericFromValue = parseInt(from.textContent, 10) || parseInt(from.textContent.slice(1), 10);  
+    const numericToValue = parseInt(to.textContent, 10) || parseInt(to.textContent.slice(1), 10);
 
     this.element.dispatchEvent(new CustomEvent('range-select', {
       bubbles: true,
       detail: {
-        from: Number(from.textContent.slice(1)), 
-        to: Number(to.textContent.slice(1)),
+        from: numericFromValue, 
+        to: numericToValue,
       },
     }));
   }
@@ -153,14 +165,14 @@ export default class DoubleSlider {
 
   clearThumbData() {
     this.currentThumb = null;
-    this.cursorOffest = null;
+    this.cursorOffset = null;
     
     document.removeEventListener('pointermove', this.moveThumb);
     document.removeEventListener('pointerup', this.dropThumb);
   }
 
   destroy() {
-    this.element.removeEventListener('pointerdown', this.initThumb);
+    this.element.removeEventListener('pointerdown', this.onClick);
 
     this.clearThumbData();
     this.remove();
