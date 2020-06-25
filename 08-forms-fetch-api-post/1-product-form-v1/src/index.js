@@ -317,8 +317,9 @@ export default class ProductForm {
     }
 
     destroy() {
-
-        this.uploadImage.removeEventListener('pointerdown', this.initImageUploading);
+        const {uploadBtn} = this.subElements;
+        
+        uploadBtn.removeEventListener('pointerdown', this.initImageUploading);
         this.element.removeEventListener('submit', this.uploadData);
 
         this.remove();
@@ -326,7 +327,7 @@ export default class ProductForm {
         this.imageFile = null;
         this.categoriesData = [];
         this.productData = {};
-        this.element = null;
+        this.subElements = {};
     }
 }
 
