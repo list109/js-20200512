@@ -3,6 +3,50 @@ export default class DoubleSlider {
   currentThumb = null;
   cursorOffest = null;
 
+  initThumb = event => {
+    const thumb = event.target.closest('[data-element^="thumb"]');
+    if (!thumb) return;
+
+    this.currentThumb = thumb;
+
+    this.element.classList.add('range-slider_dragging');
+
+    document.addEventListener('pointermove', this.moveThumb);
+    document.addEventListener('pointerup', this.dropThumb);
+  }
+
+  moveThumb = event => {
+    const { inner } = this.subElements;
+    const { left: parentLeftEdge, width: parentWidth } = inner.getBoundingClientRect();
+    const currentThumbName = this.currentThumb.dataset.element;
+    const siblingThumbName = currentThumbName === "thumbRight" ? "thumbLeft" : "thumbRight";
+    const edges = { 'thumbRight': 'right', 'thumbLeft': 'left' };
+    const siblingThumbPosition = parseFloat(this.subElements[siblingThumbName].style[edges[siblingThumbName]], 4);
+    
+    let changedPosition = event.clientX - parentLeftEdge - this.cursorOffest;
+      
+    if(changedPosition <= 0) changedPosition = 0;
+    if(changedPosition >= parentWidth) changedPosition = parentWidth;
+     
+    changedPosition = currentThumbName === 'thumbRight' ? parentWidth - changedPosition : changedPosition;
+    changedPosition = this.getRelatableValue(changedPosition, parentWidth);
+    
+
+    changedPosition = Math.min(changedPosition, 100 - siblingThumbPosition);
+
+    this.currentThumb.style[edges[currentThumbName]] = `${changedPosition}%`;
+
+    this.changeProgress();
+    this.changeNumericFields();
+  }
+
+  dropThumb = event => {
+    this.sendEvent();
+
+    this.element.classList.remove('range-slider_dragging');
+    this.clearThumbData();
+  }
+
   constructor({
     min = 0,
     max = 1000,
@@ -75,50 +119,6 @@ export default class DoubleSlider {
 
   initEventListeners() {
     document.addEventListener('pointerdown', this.initThumb);
-  }
-
-  initThumb = event => {
-    const thumb = event.target.closest('[data-element^="thumb"]');
-    if (!thumb) return;
-
-    this.currentThumb = thumb;
-
-    this.element.classList.add('range-slider_dragging');
-
-    document.addEventListener('pointermove', this.moveThumb);
-    document.addEventListener('pointerup', this.dropThumb);
-  }
-
-  moveThumb = event => {
-    const { inner } = this.subElements;
-    const { left: parentLeftEdge, width: parentWidth } = inner.getBoundingClientRect();
-    const currentThumbName = this.currentThumb.dataset.element;
-    const siblingThumbName = currentThumbName === "thumbRight" ? "thumbLeft" : "thumbRight";
-    const edges = { 'thumbRight': 'right', 'thumbLeft': 'left' };
-    const siblingThumbPosition = parseFloat(this.subElements[siblingThumbName].style[edges[siblingThumbName]], 4);
-    
-    let changedPosition = event.clientX - parentLeftEdge - this.cursorOffest;
-      
-    if(changedPosition <= 0) changedPosition = 0;
-    if(changedPosition >= parentWidth) changedPosition = parentWidth;
-     
-    changedPosition = currentThumbName === 'thumbRight' ? parentWidth - changedPosition : changedPosition;
-    changedPosition = this.getRelatableValue(changedPosition, parentWidth);
-    
-
-    changedPosition = Math.min(changedPosition, 100 - siblingThumbPosition);
-
-    this.currentThumb.style[edges[currentThumbName]] = `${changedPosition}%`;
-
-    this.changeProgress();
-    this.changeNumericFields();
-  }
-
-  dropThumb = event => {
-    this.sendEvent();
-
-    this.element.classList.remove('range-slider_dragging');
-    this.clearThumbData();
   }
 
   getRelatableValue(dividend, divider) {
