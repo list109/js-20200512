@@ -317,20 +317,16 @@ export default class ProductForm {
     }
 
     destroy() {
-        
 
-        console.log(this);
+        this.uploadImage.removeEventListener('pointerdown', this.initImageUploading);
+        this.element.removeEventListener('submit', this.uploadData);
 
-        //this.uploadImage.removeEventListener('pointerdown', this.initImageUploading);
-        //this.element.removeEventListener('submit', this.uploadData);
-
-        //this.remove();
+        this.remove();
 
         this.imageFile = null;
         this.categoriesData = [];
         this.productData = {};
-
-
+        this.element = null;
     }
 }
 
