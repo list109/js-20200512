@@ -6,42 +6,18 @@ export default class SortableList {
     leftCursorShift;
     topCursorShift;
 
-    checkDragElement = event => {
+    onClick = event => {
       
         const dragBtn = event.target.closest('[data-grab-handle]');
         const dragItem = event.target.closest('.sortable-list__item')
         const dragItemParent = event.target.closest('.sortable-list')
 
         if (dragBtn && dragItem && dragItemParent) {
-            const { left, top } = dragItem.getBoundingClientRect();
-            const width = dragItem.offsetWidth;
-            const height = dragItem.offsetHeight;
-            const placeholder = this.getPlaceholder({ width, height });
-
-            dragItem.style.width = `${dragItem.offsetWidth}px`;
-            dragItem.classList.add('sortable-list__item_dragging');
-
-            dragItem.replaceWith(placeholder);
-            dragItemParent.append(dragItem);
-
-            this.leftCursorShift = event.clientX - left;
-            this.topCursorShift = event.clientY - top;
-
-            this.setPosition(dragItem, event);
-
-            document.addEventListener('pointermove', this.moveDragElement);
-            document.addEventListener('pointerup', this.dropDragElement);
-            dragItem.ondragstart = () => false;
-
-            this.dragItemParent = dragItemParent;
-            this.currentDragItem = dragItem;
-            this.placeholder = placeholder;
-
-            event.preventDefault();
+            this.initDragElement({dragItem, dragItemParent});
         }
       
       const binBtn = event.target.closest('[data-delete-handle]');
-      if (binBtn && dragItem) dragItem.remove();
+      if (binBtn) dragItem?.remove();
     }
 
     moveDragElement = event => {
@@ -109,8 +85,36 @@ export default class SortableList {
     }
 
     initEventListener() {
-        document.addEventListener('pointerdown', this.checkDragElement);
+        document.addEventListener('pointerdown', this.onClick);
         document.addEventListener('click', this.deleteItem);
+    }
+
+    initDragElement({dragItem, dragItemParent}) {
+        const { left, top } = dragItem.getBoundingClientRect();
+        const width = dragItem.offsetWidth;
+        const height = dragItem.offsetHeight;
+        const placeholder = this.getPlaceholder({ width, height });
+
+        dragItem.style.width = `${dragItem.offsetWidth}px`;
+        dragItem.classList.add('sortable-list__item_dragging');
+
+        dragItem.replaceWith(placeholder);
+        dragItemParent.append(dragItem);
+
+        this.leftCursorShift = event.clientX - left;
+        this.topCursorShift = event.clientY - top;
+
+        this.setPosition(dragItem, event);
+
+        document.addEventListener('pointermove', this.moveDragElement);
+        document.addEventListener('pointerup', this.dropDragElement);
+        dragItem.ondragstart = () => false;
+
+        this.dragItemParent = dragItemParent;
+        this.currentDragItem = dragItem;
+        this.placeholder = placeholder;
+
+        event.preventDefault();
     }
 
     getPlaceholder({ width, height }) {
@@ -158,7 +162,7 @@ export default class SortableList {
     }
 
     destroy() {
-      document.removeEventListener('pointerdown', this.checkDragElement);
+      document.removeEventListener('pointerdown', this.onClick);
       document.removeEventListener('click', this.deleteItem);
       this.remove();
       this.clearDragInformation();
