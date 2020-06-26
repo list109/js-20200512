@@ -97,7 +97,16 @@ export default class SortableList {
         document.addEventListener('click', this.onClick);
     }
 
+    initDragItemEventListeners(dragItem) {
+        document.addEventListener('pointermove', this.moveDragElement);
+        document.addEventListener('pointerup', this.dropDragElement);
+        dragItem.ondragstart = () => false;
+    }
+
     initDragElement({ dragItem, dragItemParent }) {
+        
+        event.preventDefault();
+
         const { left, top } = dragItem.getBoundingClientRect();
         const width = dragItem.offsetWidth;
         const height = dragItem.offsetHeight;
@@ -114,15 +123,11 @@ export default class SortableList {
 
         this.setPosition(dragItem, event);
 
-        document.addEventListener('pointermove', this.moveDragElement);
-        document.addEventListener('pointerup', this.dropDragElement);
-        dragItem.ondragstart = () => false;
+        this.initDragItemEventListeners(dragItem);
 
         this.dragItemParent = dragItemParent;
         this.currentDragItem = dragItem;
         this.placeholder = placeholder;
-
-        event.preventDefault();
     }
 
     getPlaceholder({ width, height }) {
