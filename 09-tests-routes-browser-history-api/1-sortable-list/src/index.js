@@ -36,11 +36,11 @@ export default class SortableList {
 
         this.setPosition(dragItem, event);
 
-        const dropArea = this.getElementBelow(dragItem, event);
+        const elemBelow = this.getElementBelow(dragItem, event);
+        const dropArea = elemBelow?.closest('.sortable-list__item');
         const isParent = this.dragItemParent.contains(dropArea);
-        const isDropArea = dropArea?.matches('.sortable-list__item');
 
-        if (isDropArea && isParent) {
+        if (dropArea && isParent) {
             const { top: dropAreaTop } = dropArea.getBoundingClientRect();
             const dropAreaMiddle = dropArea.offsetHeight / 2 + dropAreaTop;
 
@@ -104,7 +104,7 @@ export default class SortableList {
     }
 
     initDragElement({ dragItem, dragItemParent }) {
-        
+
         event.preventDefault();
 
         const { left, top } = dragItem.getBoundingClientRect();
