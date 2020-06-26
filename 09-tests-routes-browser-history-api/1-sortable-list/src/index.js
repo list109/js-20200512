@@ -107,6 +107,8 @@ export default class SortableList {
 
         event.preventDefault();
 
+        if(this.placeholder) return;
+
         const { left, top } = dragItem.getBoundingClientRect();
         const width = dragItem.offsetWidth;
         const height = dragItem.offsetHeight;
