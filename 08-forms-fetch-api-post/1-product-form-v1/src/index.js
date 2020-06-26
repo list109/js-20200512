@@ -123,7 +123,7 @@ export default class ProductForm {
 
             const {value: url} = item.children[0];
             const {value: source} = item.children[1];
-            
+
             return { url, source };
         })
 
