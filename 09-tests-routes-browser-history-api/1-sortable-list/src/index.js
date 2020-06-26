@@ -6,18 +6,26 @@ export default class SortableList {
     leftCursorShift;
     topCursorShift;
 
-    onClick = event => {
-      
-        const dragBtn = event.target.closest('[data-grab-handle]');
-        const dragItem = event.target.closest('.sortable-list__item')
-        const dragItemParent = event.target.closest('.sortable-list')
+    onPointerdown = event => {
+        const dragItem = event.target.closest('.sortable-list__item');
+        const dragItemParent = event.target.closest('.sortable-list');
 
-        if (dragBtn && dragItem && dragItemParent) {
-            this.initDragElement({dragItem, dragItemParent});
+        const isDragBtnExist = dragItem?.querySelector('[data-grab-handle]');
+        const isDragBtnClicked = event.target.closest('[data-grab-handle]');
+        
+        if(isDragBtnExist) {
+            if(isDragBtnClicked) this.initDragElement({ dragItem, dragItemParent });
+            return;
         }
-      
-      const binBtn = event.target.closest('[data-delete-handle]');
-      if (binBtn) dragItem?.remove();
+
+        this.initDragElement({ dragItem, dragItemParent });
+    }
+
+    onClick = event => {
+        const binBtn = event.target.closest('[data-delete-handle]');
+        const dragItem = event.target.closest('.sortable-list__item');
+        
+        if (binBtn && dragItem) dragItem.remove();
     }
 
     moveDragElement = event => {
@@ -33,14 +41,14 @@ export default class SortableList {
         const isDropArea = dropArea?.matches('.sortable-list__item');
 
         if (isDropArea && isParent) {
-            const { top: dropAreaTop} = dropArea.getBoundingClientRect();
+            const { top: dropAreaTop } = dropArea.getBoundingClientRect();
             const dropAreaMiddle = dropArea.offsetHeight / 2 + dropAreaTop;
-          
-            if(clientY > placeholderBottom && clientY > dropAreaMiddle) {
-               dropArea.after(placeholder);
+
+            if (clientY > placeholderBottom && clientY > dropAreaMiddle) {
+                dropArea.after(placeholder);
             }
-            if(clientY < placeholderTop && clientY < dropAreaMiddle) {
-               dropArea.before(placeholder);
+            if (clientY < placeholderTop && clientY < dropAreaMiddle) {
+                dropArea.before(placeholder);
             }
         }
     }
@@ -85,11 +93,11 @@ export default class SortableList {
     }
 
     initEventListener() {
-        document.addEventListener('pointerdown', this.onClick);
-        document.addEventListener('click', this.deleteItem);
+        document.addEventListener('pointerdown', this.onPointerdown);
+        document.addEventListener('click', this.onClick);
     }
 
-    initDragElement({dragItem, dragItemParent}) {
+    initDragElement({ dragItem, dragItemParent }) {
         const { left, top } = dragItem.getBoundingClientRect();
         const width = dragItem.offsetWidth;
         const height = dragItem.offsetHeight;
@@ -147,24 +155,24 @@ export default class SortableList {
     }
 
     clearDragInformation() {
-      document.removeEventListener('pointermove', this.moveDragElement);
-      document.removeEventListener('pointerup', this.dropDragElement);
+        document.removeEventListener('pointermove', this.moveDragElement);
+        document.removeEventListener('pointerup', this.dropDragElement);
 
-      this.currentDragItem = null;
-      this.placeholder = null;
-      this.leftCursorShift = null;
-      this.topCursorShift = null;
-      this.dragItemParent =null;
+        this.currentDragItem = null;
+        this.placeholder = null;
+        this.leftCursorShift = null;
+        this.topCursorShift = null;
+        this.dragItemParent = null;
     }
 
     remove() {
-      this.element.remove();
+        this.element.remove();
     }
 
     destroy() {
-      document.removeEventListener('pointerdown', this.onClick);
-      document.removeEventListener('click', this.deleteItem);
-      this.remove();
-      this.clearDragInformation();
+        document.removeEventListener('pointerdown', this.onPointerdown);
+        document.removeEventListener('click', this.onClick);
+        this.remove();
+        this.clearDragInformation();
     }
 }
