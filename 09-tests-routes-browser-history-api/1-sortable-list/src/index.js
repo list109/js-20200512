@@ -7,6 +7,9 @@ export default class SortableList {
     topCursorShift;
     prevClientY;
 
+    prevElemenetMiddle;
+    nextElementMiddle;
+
     onPointerdown = event => {
         const dragItem = event.target.closest('.sortable-list__item');
         const dragItemParent = event.target.closest('.sortable-list');
@@ -33,24 +36,17 @@ export default class SortableList {
         const { clientY } = event;
         const placeholder = this.placeholder;
         const dragItem = this.currentDragItem;
-        const { top: placeholderTop, bottom: placeholderBottom } = placeholder.getBoundingClientRect();
+        const {previousElementSibling: prevElem, nextElementSibling: nextElem} = placeholder;
 
-        const elemBelow = this.getElementBelow(dragItem, event);
-        const dropArea = elemBelow?.closest('.sortable-list__item');
-        const isParent = this.dragItemParent.contains(dropArea);
-
-        if (dropArea && isParent) {
-            const { top: dropAreaTop } = dropArea.getBoundingClientRect();
-            const dropAreaMiddle = dropArea.offsetHeight / 2 + dropAreaTop;
-
-            if (clientY > placeholderBottom && clientY > dropAreaMiddle) {
-                dropArea.after(placeholder);
-            }
-
-            if (clientY < placeholderTop && clientY < dropAreaMiddle) {
-                dropArea.before(placeholder);
-            }
+        if(clientY < this.prevElemenetMiddle) {
+            prevElem.before(placeholder);
         }
+
+        if(clientY > this.nextElementMiddle && nextElem !== dragItem) {
+            nextElem.after(placeholder);
+        }
+
+        [this.prevElemenetMiddle, this.nextElementMiddle] = this.getNeighborElementsMiddles(placeholder);
 
         this.setPosition(dragItem, event);
     }
@@ -120,12 +116,14 @@ export default class SortableList {
         dragItem.classList.add('sortable-list__item_dragging');
 
         dragItem.replaceWith(placeholder);
-        dragItemParent.append(dragItem);
+        dragItemParent.after(dragItem);
 
         this.leftCursorShift = event.clientX - left;
         this.topCursorShift = event.clientY - top;
 
         this.setPosition(dragItem, event);
+
+        [this.prevElemenetMiddle, this.nextElementMiddle] = this.getNeighborElementsMiddles(placeholder);
 
         this.initDragItemEventListeners(dragItem);
 
@@ -173,14 +171,16 @@ export default class SortableList {
         this.prevClientY = clientY;
     }
 
-    getElementBelow(elem, { clientX: x, clientY: y }) {
-        const dragItem = this.currentDragItem;
+    getNeighborElementsMiddles(placeholder) {
+        const {previousElementSibling: prevElemenet, nextElementSibling: nextElement} = placeholder;
+        
+        const prevElemenetHalf = prevElemenet?.offsetHeight / 2;
+        const nextElemenHalf = nextElement?.offsetHeight / 2;
 
-        dragItem.style.display = 'none';
-        const elementBelow = document.elementFromPoint(x, y);
-        dragItem.style.display = '';
-
-        return elementBelow;
+        const prevElemenetMiddle = prevElemenet?.getBoundingClientRect().top + prevElemenetHalf;
+        const nextElementMiddle = nextElement?.getBoundingClientRect().top + nextElemenHalf;
+        
+        return [prevElemenetMiddle, nextElementMiddle];
     }
 
     clearDragInformation() {
