@@ -5,6 +5,7 @@ export default class SortableList {
     placeholder;
     leftCursorShift;
     topCursorShift;
+    prevClientY;
 
     onPointerdown = event => {
         const dragItem = event.target.closest('.sortable-list__item');
@@ -34,8 +35,6 @@ export default class SortableList {
         const dragItem = this.currentDragItem;
         const { top: placeholderTop, bottom: placeholderBottom } = placeholder.getBoundingClientRect();
 
-        this.setPosition(dragItem, event);
-
         const elemBelow = this.getElementBelow(dragItem, event);
         const dropArea = elemBelow?.closest('.sortable-list__item');
         const isParent = this.dragItemParent.contains(dropArea);
@@ -47,10 +46,13 @@ export default class SortableList {
             if (clientY > placeholderBottom && clientY > dropAreaMiddle) {
                 dropArea.after(placeholder);
             }
+
             if (clientY < placeholderTop && clientY < dropAreaMiddle) {
                 dropArea.before(placeholder);
             }
         }
+
+        this.setPosition(dragItem, event);
     }
 
     dropDragElement = () => {
@@ -93,8 +95,8 @@ export default class SortableList {
     }
 
     initEventListener() {
-        document.addEventListener('pointerdown', this.onPointerdown);
-        document.addEventListener('click', this.onClick);
+        this.element.addEventListener('pointerdown', this.onPointerdown);
+        this.element.addEventListener('click', this.onClick);
     }
 
     initDragItemEventListeners(dragItem) {
@@ -130,6 +132,7 @@ export default class SortableList {
         this.dragItemParent = dragItemParent;
         this.currentDragItem = dragItem;
         this.placeholder = placeholder;
+        this.prevClientY = event.clientY;
     }
 
     getPlaceholder({ width, height }) {
@@ -144,11 +147,30 @@ export default class SortableList {
     }
 
     setPosition(elem, { clientX, clientY }) {
-        const topPosition = clientY - this.topCursorShift;
-        const leftPosition = clientX - this.leftCursorShift;
+        const {clientHeight: documentHeight, clientWidth: documentWidth} = document.documentElement;
+        const {offsetHeight: elemHeight} = elem;
+        const positionDiff = clientY - this.prevClientY;
 
-        elem.style.top = `${topPosition}px`
-        elem.style.left = `${leftPosition}px`;
+        let topPosition = clientY - this.topCursorShift;
+        let leftPosition = clientX - this.leftCursorShift;
+
+        if(topPosition < 0) {
+            topPosition = 0;
+            window.scrollBy(0, -Math.abs(positionDiff));
+        }
+        if(topPosition + elemHeight > documentHeight) {
+            topPosition = documentHeight - elemHeight;
+            window.scrollBy(0, Math.abs(positionDiff));
+        }
+        
+        const definitiveTop = topPosition;
+        const definitiveLeft = (leftPosition < 0) ? 0 : leftPosition;
+        //if(leftPosition + elemWidth > documentWidth) leftPosition = documentWidth - elemWidth;
+
+        elem.style.top = `${definitiveTop}px`
+        elem.style.left = `${definitiveLeft}px`;
+
+        this.prevClientY = clientY;
     }
 
     getElementBelow(elem, { clientX: x, clientY: y }) {
@@ -170,6 +192,7 @@ export default class SortableList {
         this.leftCursorShift = null;
         this.topCursorShift = null;
         this.dragItemParent = null;
+        this.prevClientY = null;
     }
 
     remove() {
@@ -177,8 +200,8 @@ export default class SortableList {
     }
 
     destroy() {
-        document.removeEventListener('pointerdown', this.onPointerdown);
-        document.removeEventListener('click', this.onClick);
+        this.element.removeEventListener('pointerdown', this.onPointerdown);
+        this.element.removeEventListener('click', this.onClick);
         this.remove();
         this.clearDragInformation();
     }
