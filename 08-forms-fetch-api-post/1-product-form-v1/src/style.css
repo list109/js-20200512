@@ -145,6 +145,10 @@ body {
   z-index: 10000;
 }
 
+.sortable-list__item.sortable-list__item_dragging [data-grab-handle] {
+  cursor: grabbing;
+}
+
 .sortable-list__placeholder {
   border: 1px solid var(--blue);
   margin: 3px 0;
